@@ -2,6 +2,8 @@
 
 # dependencies
 /node_modules
+/middleware//node_modules
+/middleware/.env
 /.pnp
 .pnp.js
 

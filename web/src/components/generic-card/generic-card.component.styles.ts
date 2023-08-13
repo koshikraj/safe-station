@@ -15,6 +15,11 @@ export const useStyles = createStyles((theme) => ({
     boxShadow: "0px 2px 6px rgba(0, 0, 0, 0.08)",
     borderRadius: "40px",
     color: theme.colorScheme === "dark" ? "#A6A7AB" : theme.colors.gray[7],
+    "&:hover": {
+      cursor: "pointer",
+      borderColor: "#2ACB82",
+      boxShadow: "0 0 5px #2ACB82",
+    }
   },
   p: {
     fontWeight: 500,
@@ -26,4 +31,6 @@ export const useStyles = createStyles((theme) => ({
   image: {
     marginTop: "20px",
   },
+
+
 }));

@@ -130,7 +130,7 @@ export const Head = (props) => {
         <Group position="apart">
           <Image
             onClick={() => {
-              navigate(RoutePath.account);
+              navigate(RoutePath.plugins);
             }}
             sx={{ cursor: "pointer" }}
             src={dark ? LogoDark : LogoLight}

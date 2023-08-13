@@ -56,13 +56,6 @@ export const Plugin: FunctionComponent<PluginProps> = ({ address }) => {
     }
 
     return (
-        // <Card className="Plugin">
-        //     <Tooltip title={address}><img className="AddressIcon" src={blocky} /></Tooltip>
-        //     <div className="Plugin-title">{!details ? "Loading Metadata" : <PluginMeta metadata={details.metadata} />}</div>
-        //     {details?.metadata?.requiresRootAccess == true && <WarningIcon color="warning" />}
-        //     {details?.enabled != undefined && <Button className="Plugin-toggle" onClick={handleToggle}>{details?.enabled ? "Disable" : "Enable"}</Button>}
-        //     {(details?.metadata?.appUrl?.length ?? 0) > 0 && <OpenInNewIcon className="Plugin-link" onClick={() => openSafeApp(details?.metadata?.appUrl!!)} />}
-        // </Card>
 
             <GenericCard
             title={details?.metadata.name}

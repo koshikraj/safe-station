@@ -6,6 +6,9 @@ import { Plugin } from './Plugin';
 import { useStyles } from "./plugins.screen.styles";
 import { GenericCard, Image, Title, VoucherCard } from "../../components";
 
+
+const mockPlugins = ["1","2"]
+
 function PluginList() {
 
   const { classes } = useStyles();
@@ -42,6 +45,10 @@ function PluginList() {
       </Container>
       <div className={classes.actionsContainer}>
       {plugins.map((plugin) => 
+        <Plugin
+        address={plugin}
+      />)}
+      { !plugins.length && mockPlugins.map((plugin) => 
         <Plugin
         address={plugin}
       />)}

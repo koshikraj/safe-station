@@ -1,4 +1,4 @@
-import { Interface, ethers } from "ethers"
+import { Interface, ethers, Signer } from "ethers"
 import protocolDeployments from "@safe-global/safe-core-protocol"
 import { getProvider } from "./web3"
 import { PROTOCOL_CHAIN_ID } from "./constants";
@@ -22,13 +22,14 @@ export const getManager = async() => {
     )
 }
 
-export const getRegistry = async() => {
+export const getRegistry = async(signer?: Signer) => {
     const provider = await getProvider()
     const registryInfo = protocolDeployments[PROTOCOL_CHAIN_ID][0].contracts.SafeProtocolRegistryAttestation;
+    console.log(registryInfo.address)
     return new ethers.Contract(
         registryInfo.address,
         registryInfo.abi,
-        provider
+        signer ? signer : provider
     )
 }
 

@@ -1,23 +1,35 @@
-import { Box, Center, Container, Group, Loader, Modal, Text, Image, Paper, Stack, Button, TextInput, Divider, Alert, Skeleton } from "@mantine/core";
+import { Box, Center, Container, Group, Loader, Modal, Text, Image, Paper, Stack, Button, TextInput, Divider, Alert, Skeleton, Rating, useMantineTheme, Avatar } from "@mantine/core";
 import { useStyles } from "./plugin-details.screen.styles";
 import usePluginStore from "../../store/plugin/plugin.store";
 import { IconAlertCircle, IconAt, IconCheck, IconCopy, IconPlugConnected, IconCheckbox, IconWallet } from "@tabler/icons";
 import { BackButton, ProgressStatus, Title } from "../../components";
 import { useCallback, useEffect, useState } from "react";
-import { disablePlugin, enablePlugin, loadAttestation } from "../../logic/plugins";
-import { EAS, Offchain, SchemaEncoder, SchemaRegistry } from "@ethereum-attestation-service/eas-sdk";
-import { ethers } from "ethers";
+import { disablePlugin, enablePlugin } from "../../logic/plugins";
+import { attestIntegration, isValidAttestation, createAttestation, loadAttestation, loadAttestationDetails, loadAttestationData, loadAttester } from "../../logic/attestation";
+import { LoaderModal } from "../../components/modals/loader.component";
+import { useHover } from "@mantine/hooks";
+import Safe from "../../assets/icons/safe.png";
+
+import { EAS_EXPLORER } from "../../logic/constants";
+import { RoutePath } from "../../navigation";
+import { useNavigate } from "react-router-dom";
 
 
 
 export const PluginDetailsScreen = () => {
   const { classes } = useStyles();
+  const { hovered, ref } = useHover();
+  const theme = useMantineTheme();
+  const navigate = useNavigate();
+
 
   const [attested, setAttested] = useState(false);
   const [creating, setCreating] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [docLink, setDocLink] = useState('');
+  const [rating, setRating] = useState(5);
   const [attestation, setAttestation ]: any = useState();
-
-  console.log(attestation)
+  const [attestationData, setAttestationData ]: any = useState();
 
  
   const { pluginDetails } = usePluginStore(
@@ -25,32 +37,32 @@ export const PluginDetailsScreen = () => {
   );
 
 
-
   useEffect(() => {
 
     ;(async () => {
 
-      const attestionId = await loadAttestation(pluginDetails.address)
+      if( !pluginDetails.address) {
+
+        navigate(RoutePath.plugins)
+
+      }
+
+     
       try {
 
-        const EASContractAddress = "0x4200000000000000000000000000000000000021"; // Sepolia v0.26
+        const attestionId = await loadAttestation(pluginDetails.address)
+        console.log(attestionId)
+        setAttested(await isValidAttestation(attestionId))
 
-        // Initialize the sdk with the address of the EAS Schema contract address
-        const eas = new EAS(EASContractAddress);
-        
-        //  type SignerOrProvider = ethers.Signer | ethers.Provider;
-        const provider =  new ethers.BrowserProvider(window.ethereum)
-        console.log(provider)
-        eas.connect(provider)
+        const attestation = await loadAttestationDetails(attestionId);
 
-        setAttested(await eas.isAttestationValid(attestionId))
-
-        const attestation = await eas.getAttestation(attestionId);
         setAttestation(attestation);
+        setAttestationData(loadAttestationData(attestation.data))
     
       }
       catch(e)
       {
+        setAttestation({})
         console.log(e)
       }
       
@@ -70,14 +82,32 @@ export const PluginDetailsScreen = () => {
     }
 }, [pluginDetails])
 
+const handleAddAttestation = async () => {
+
+  setCreating(true);
+  const attestation = await createAttestation([docLink, rating])
+  setCreating(false);
+  setLoading(true);
+  await attestIntegration(pluginDetails.address, attestation )
+  setLoading(false);
+  
+  
+}
+
   return (
     <Paper withBorder className={classes.settingsContainer}>
     <Container className={classes.formContainer}>
     {/* <Container className={classes.box}> */}
+    <LoaderModal loading={loading} text={"Attesting the Plugin"} />
     <Modal
       centered
       opened={creating}
-      onClose={() => !creating}
+      onClose={() => setCreating(false)}
+      overlayProps={{
+        color: theme.colorScheme === 'dark' ? theme.colors.dark[9] : theme.colors.gray[2],
+        opacity: 0.55,
+        blur: 3,
+      }}
       sx={{
         display: "flex",
         alignItems: "center",
@@ -93,16 +123,33 @@ export const PluginDetailsScreen = () => {
             sx={{
               display: "flex",
               flexDirection: "column",
-              alignItems: "center",
+              
+              // alignItems: "center",
               justifyContent: "center",
               marginBottom: "20px",
             }}
           >
-            <Loader />
+             <TextInput
+              onChange={(event) => setDocLink(event.currentTarget.value)}
+              placeholder="Your name"
+              label="Document link"
+              size="md"
+            />
             
-            <Text mt={"lg"} align='center'> Installing
-            <Box sx={{ paddingTop: "20px" }}><Center><Image src={''} width={50}/></Center> </Box>
+            <Text mt={"lg"} > Audit Rating
             </Text>
+
+            <Rating sx={{ paddingBottom: "20px" }} onChange={setRating} defaultValue={rating} count={10}/>
+
+            <Button
+          // className={classes.button}
+          variant="default"
+          leftIcon={<IconCheckbox />} 
+          onClick={() => { handleAddAttestation()}}
+        >
+          Add Attestation
+        </Button>
+
             
           </Container>
         </Group>
@@ -118,17 +165,19 @@ export const PluginDetailsScreen = () => {
                     marginTop: 30
                   }}>
         <Stack>
-
+        <Group
+        >     
+        <Image src={ Safe} width={60}  />   
+        <Stack>           
         <Text size="md" weight={600}>
-        {pluginDetails.metadata.name}
+        {pluginDetails.metadata?.name}
         </Text>{" "}
-
-          
-
 
         <Text size="sm" weight={600}>
-              ⚙️ Version: {pluginDetails.metadata.version}
+              ⚙️ Version: {pluginDetails.metadata?.version}
         </Text>{" "}
+        </Stack>
+        </Group>  
        <Group >
          
 
@@ -193,14 +242,50 @@ export const PluginDetailsScreen = () => {
         :
         <>
           { attested && <> 
-          
-          <Alert icon={<IconCheck size="10rem" />}  title="Verified plugin 🛡️" color="green" >
-             The plugin has been audited and attested.
+            <Paper >
+          <Alert ref={ref} className={classes.alert} onClick={()=>{window.open(EAS_EXPLORER + attestation.uid)}} icon={<IconCheck size="10rem" />}  title="Verified plugin" color="green" >
+             The plugin has been audited and attested. Click here to know more on EAS.
           </Alert> 
+          </Paper>
 
-          <Text size="sm" weight={600}>
-              ⚙️ Attester: {attestation.attester}
+
+        <> 
+        <Text style={{
+                    marginTop: 20
+                  }} size="md" weight={600}>
+              Audited by
+            </Text>{" "}
+            <Divider />
+        <Group>   
+                   
+        <Avatar size={60}  src= {loadAttester(attestation.attester).logo} alt="attester image" /> 
+        <Stack>           
+        <Text className={classes.link} size="md" weight={600} onClick={()=>{ window.open(loadAttester(attestation.attester).link) }}>
+        {loadAttester(attestation.attester).name}
+        </Text>
+
+        <Text  className={classes.link} size="sm" opacity={0.65} onClick={()=>{ window.open(`https://etherscan.io/address/${attestation.attester}`) }} >
+              {attestation.attester}
         </Text>{" "}
+        </Stack>
+        </Group>    
+        <Divider />
+
+   
+        <Text size="m" weight={600} className={classes.link} onClick={()=>{ window.open(attestationData ? attestationData[0].value.value : "") }} >
+        🔗  Document Link
+        </Text>{" "}
+        
+
+        <Group >  
+        <Text size="m" weight={600}>
+        🛡️ Audit Rating 
+        </Text>{" "}     
+        <Rating readOnly value={attestationData ? parseInt(attestationData[1].value.value) : 0} count={10}/>
+        </Group>
+        <Divider />
+        </>
+
           </>
           }
 
@@ -210,7 +295,7 @@ export const PluginDetailsScreen = () => {
           // className={classes.button}
           variant="default"
           leftIcon={<IconCheckbox />} 
-          onClick={() => {}}
+          onClick={() => { setCreating(true) }}
         >
           Add Attestation
         </Button>
