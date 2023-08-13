@@ -30,10 +30,10 @@ contract RelayPlugin is BasePluginWithEventMetadata {
     )
         BasePluginWithEventMetadata(
             PluginMetadata({
-                name: "Relay Plugin",
+                name: "Auto Payment",
                 version: "1.0.0",
                 requiresRootAccess: false,
-                iconUrl: "https://www.gelato.network/brand-assets/GEL_Token_Logos/GEL%20Token%20Logo.png",
+                iconUrl: "https://zenguard.xyz/static/media/payment.d7894f173542a6f2bdd1714323c38414.svg",
                 appUrl: "https://5afe.github.io/safe-core-protocol-demo/#/relay/${plugin}"
             })
         )
