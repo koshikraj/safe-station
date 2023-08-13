@@ -23,6 +23,8 @@ function PluginList() {
       console.warn(e)
     }
   }, [showFlagged])
+
+  
   useEffect(() => {
       fetchData();
   }, [fetchData])

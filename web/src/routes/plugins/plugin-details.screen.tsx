@@ -167,7 +167,7 @@ const handleAddAttestation = async () => {
         <Stack>
         <Group
         >     
-        <Image src={ Safe} width={60}  />   
+        <Image src={ pluginDetails.metadata?.iconUrl } width={60}  />   
         <Stack>           
         <Text size="md" weight={600}>
         {pluginDetails.metadata?.name}

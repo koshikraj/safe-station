@@ -30,10 +30,10 @@ contract RelayPlugin is BasePluginWithEventMetadata {
     )
         BasePluginWithEventMetadata(
             PluginMetadata({
-                name: "Sample AAVE Plugin",
-                version: "1.0.2",
+                name: "Relay Plugin",
+                version: "1.0.0",
                 requiresRootAccess: false,
-                iconUrl: "https://cdn.jsdelivr.net/gh/atomiclabs/cryptocurrency-icons@1a63530be6e374711a8554f31b17e4cb92c25fa5/128/color/aave.png",
+                iconUrl: "https://www.gelato.network/brand-assets/GEL_Token_Logos/GEL%20Token%20Logo.png",
                 appUrl: "https://5afe.github.io/safe-core-protocol-demo/#/relay/${plugin}"
             })
         )

@@ -23,9 +23,10 @@ export const getManager = async() => {
 }
 
 export const getRegistry = async(signer?: Signer) => {
+
     const provider = await getProvider()
     const registryInfo = protocolDeployments[PROTOCOL_CHAIN_ID][0].contracts.SafeProtocolRegistryAttestation;
-    console.log(registryInfo.address)
+
     return new ethers.Contract(
         registryInfo.address,
         registryInfo.abi,
